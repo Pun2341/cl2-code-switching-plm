@@ -19,12 +19,11 @@ def extract_layer_reps(model, sentences):
         tokenizer = XLMRobertaTokenizer.from_pretrained(model.config._name_or_path)
     else:
         raise ValueError("unknown model")
-
     inputs = tokenizer(sentences, padding=True, truncation=True, return_tensors="pt")
     
     outputs = model(**inputs, output_hidden_states=True)
     
-    return torch.stack(outputs.hidden_states) #(num_layers, num_sentences, sequence_length, hidden_size)
+    return torch.stack(outputs.hidden_states) # (num_layers, num_sentences, sequence_length, hidden_size)
 
 
 #example

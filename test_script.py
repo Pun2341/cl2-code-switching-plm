@@ -2,24 +2,39 @@ from sklearn import svm
 import numpy as np
 import sys
 from sklearn.model_selection import KFold
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import f1_score
+import matplotlib.pyplot as plt
+import random
+
+# Temp data
+models = ["bert-base-multilingual-cased", "xlm-roberta-base", "xlm-roberta-large"]
+num_layers = 24
+# (y_test, y_pred) per layer?
+layers = [[]]*len(models)
+for x in range(len(models)):
+    acc = []
+    for j in range(num_layers):
+        acc.append(([random.randint(0, 1), random.randint(0, 1), random.randint(0, 1), random.randint(0, 1)],
+                    [random.randint(0, 1), random.randint(0, 1), random.randint(0, 1), random.randint(0, 1)]))
+    layers[x] = acc
 
 
-def getF1Score(y_test, y_pred):
-    true_positives = 0
-    true_negatives = 0
-    false_positives = 0
-    false_negatives = 0
-    for i, (test, pred) in enumerate(zip(y_test, y_pred)):
-        if test == pred and pred == 1:
-            true_positives += 1
-        elif test == pred and pred == -1:
-            true_negatives += 1
-        elif test != pred and pred == 1:
-            false_positives += 1
-        elif test != pred and pred == -1:
-            false_negatives += 1
-        else:
-            raise AssertionError("Unexpected value:", test, pred)
-    return 2 * true_positives / (2 * true_positives + false_positives + false_negatives)
+f1Scores = np.zeros((len(models), num_layers))
+for i, model in enumerate(models):
+    for j, (y_test, y_pred) in enumerate(layers[i]):
+        f1 = f1_score(y_test, y_pred, labels=None, pos_label=1, average='binary', zero_division=0.0)
+        # Need to figure out how to get the average over "5 seeds"
+        f1Scores[i, j] = f1
 
+    plt.plot(range(1, num_layers+1), f1Scores[i, :], label=model)
+print(layers)
+# Add labels and title
+plt.xlabel('Layers')
+plt.ylabel('F-1 Score')
+plt.title('Mean F-1 Scores across layers for different PLMs')
+
+# Add a legend
+plt.legend()
+
+# Show the plot
+plt.show()

@@ -3,3 +3,4 @@ scikit_learn==1.5.2
 torch==2.2.2
 transformers==4.46.2
 numpy==1.23.2
+matplotlib==3.9.2
