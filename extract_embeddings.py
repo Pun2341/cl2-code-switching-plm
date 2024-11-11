@@ -1,26 +1,34 @@
 from transformers import BertModel, BertTokenizer, XLMRobertaTokenizer, XLMRobertaModel
+import torch
 
-def extract_layer(model_version, layer_num, sentence):
+def extract_layer_reps(model, sentences):
     """
-    Given a model version of one of the following:
+    Given: one of the following models:
         - mBERT ("bert-base-multilingual-cased"),
         - XLM-RoBERTa base ("xlm-roberta-base"),
         - XLM-RoBERTa large ("xlm-roberta-large"),
-    a layer number within range, and a string containing a sentence,
-    Returns the the layer_num layer of the model's representation of the sentence.
+    and list of sentences.
+
+    Returns: a tensor of shape (num_layers, num_sentences, sequence_length, hidden_size)
+        containing all of the model's layer representations for all input sentences.
     """
-    if model_version == "bert-base-multilingual-cased":
-        model = BertModel.from_pretrained(model_version)
-        tokenizer = BertTokenizer.from_pretrained(model_version)
-    elif model_version == "xlm-roberta-base" or model_version == "xlm-roberta-large":
-        model = XLMRobertaModel.from_pretrained(model_version)
-        tokenizer = XLMRobertaTokenizer.from_pretrained(model_version)
+
+    if model.config._name_or_path == "bert-base-multilingual-cased":
+        tokenizer = BertTokenizer.from_pretrained(model.config._name_or_path)
+    elif model.config._name_or_path == "xlm-roberta-base" or model.config._name_or_path == "xlm-roberta-large":
+        tokenizer = XLMRobertaTokenizer.from_pretrained(model.config._name_or_path)
     else:
-        raise ValueError("unknown model version")
-    
-    inputs = tokenizer(sentence, return_tensors="pt")
+        raise ValueError("unknown model")
+    inputs = tokenizer(sentences, padding=True, truncation=True, return_tensors="pt")
     
     outputs = model(**inputs, output_hidden_states=True)
-    print(len(outputs.hidden_states))
     
-    return outputs.hidden_states[layer_num][0]  # (sequence_length, hidden_size)
+    return torch.stack(outputs.hidden_states) # (num_layers, num_sentences, sequence_length, hidden_size)
+
+
+#example
+# initialize model to "bert-base-multilingual-cased", "xlm-roberta-base", or "xlm-roberta-large"
+# model = BertModel.from_pretrained("bert-base-multilingual-cased")
+# model = XLMRobertaModel.from_pretrained("xlm-roberta-base")
+# layers = extract_layer_reps(model, ["Hello how are you?", "Hola cómo estás?"])
+# print(layers.shape)
