@@ -3,7 +3,7 @@ import torch
 from itertools import batched
 
 
-def extract_layer_reps(model, cls_pooling, sentences):
+def extract_layer_reps(model, tokenizer, cls_pooling, sentences):
     """
     Given: one of the following models:
         - mBERT ("bert-base-multilingual-cased"),
@@ -15,14 +15,6 @@ def extract_layer_reps(model, cls_pooling, sentences):
     Returns: a tensor of shape (num_layers, num_sentences, sequence_length, hidden_size)
         containing all of the model's layer representations for all input sentences.
     """
-
-    if model.config._name_or_path == "bert-base-multilingual-cased":
-        tokenizer = BertTokenizer.from_pretrained(model.config._name_or_path)
-    elif model.config._name_or_path == "xlm-roberta-base" or model.config._name_or_path == "xlm-roberta-large":
-        tokenizer = XLMRobertaTokenizer.from_pretrained(model.config._name_or_path)
-    else:
-        raise ValueError("unknown model")
-
     inputs = tokenizer(sentences, padding=True, truncation=True, return_tensors="pt")
 
     outputs = model(**inputs, output_hidden_states=True)
@@ -41,10 +33,10 @@ def extract_layer_reps(model, cls_pooling, sentences):
         return torch.stack(layers)  # (num_layers, num_sentences, hidden_size)
 
 
-def batch_write_layer_reps(model, cls_pooling, sentences, file_location):
+def batch_write_layer_reps(model, tokenizer, cls_pooling, sentences, file_location):
     print(len(sentences))
-    for i, batch in enumerate(batched(sentences, 10)):
-        layers = extract_layer_reps(model, cls_pooling, batch)
+    for i, batch in enumerate(batched(sentences, 100)):
+        layers = extract_layer_reps(model, tokenizer, cls_pooling, batch)
         print(i)
         torch.save(layers, file_location+f"/model{i}.pt")
 

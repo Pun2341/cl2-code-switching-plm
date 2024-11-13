@@ -4,3 +4,4 @@ torch==2.2.2
 transformers==4.46.2
 numpy==1.26.4
 matplotlib==3.9.2
+sentencepiece==0.2.0
