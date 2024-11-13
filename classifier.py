@@ -41,7 +41,7 @@ models = {
 embedding_types = {'CLS': True}  # , 'mean': False}
 # What indicates layer size?
 num_layers = 26
-f1Scores = np.ndarray((len(models), num_layers))
+f1Scores = np.empty((len(models), num_layers))
 for m, (model_name, model_obj) in enumerate(models.items()):
     for typ in embedding_types.keys():
         print(f"Training SVM classifiers using {model_name} {typ} embeddings...")
@@ -81,7 +81,7 @@ for m, (model_name, model_obj) in enumerate(models.items()):
         with open(f'svm_classifier_layer_{typ}_{i}.pkl', 'wb') as f:
             pickle.dump(svm_classifier, f)
 
-    plt.plot(range(1, num_layers+1), f1Scores[m, :], label=model_name)
+    plt.plot(range(1, len(embeddings)+1), f1Scores[m, :len(embeddings)], label=model_name)
 
 # Add labels and title
 plt.xlabel('Layers')
