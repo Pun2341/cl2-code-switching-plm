@@ -76,7 +76,8 @@ for m, (model_name, model_obj) in enumerate(models.items()):
 
         # Print classification report
         report = classification_report(y_test, y_pred, output_dict=True, zero_division=0)
-        f1Scores[m, i] = report["0"]["f1-score"]
+        print(report)
+        f1Scores[m, i] = report["weighted avg"]["f1-score"]
         # Save the model
         with open(f'svm_classifier_layer_{typ}_{i}.pkl', 'wb') as f:
             pickle.dump(svm_classifier, f)
