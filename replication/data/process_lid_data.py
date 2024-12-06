@@ -1,3 +1,9 @@
+"""
+This script processes raw code-switching (CS) data in the .conll format into structured CSV files for downstream tasks.
+The processed data is stored in the `lid_processed` folder, with each dataset converted to a CSV format containing tokens
+and their corresponding labels.
+"""
+
 import re
 import json
 import pandas as pd
@@ -102,5 +108,5 @@ def save_processed_data(input_file, output_file):
         json.dump(processed_data, f, indent=4)
 
 # Process datasets
-save_processed_data('./raw_data_LID/lid_spaeng/train.conll', './processed_data_LID/processed_calcs.json')
-save_processed_data('./raw_data_LID/sentimix/train.conll', './processed_data_LID/processed_sentimix.json')
+save_processed_data('./replication/data/lid_raw/lid_spaeng/train.conll', './replication/data/lid_processed/processed_calcs.json')
+save_processed_data('./replication/data/lid_raw/sentimix/train.conll', './replication/data/lid_processed/processed_sentimix.json')
